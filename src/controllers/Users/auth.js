@@ -4,7 +4,7 @@ import generateToken from "../../utils/generateToken.js";
 import redisClient from "../../utils/redisClient.js"; // Assuming you imported this
 import { exclude } from "../../utils/exclude.js";
 
-export const loginUser = async (req, res) => {
+export const loginUser = async(req, res) => {
   try {
     const { email, password } = req.body;
 

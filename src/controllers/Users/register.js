@@ -3,7 +3,7 @@ import prisma from "../../prisma/client.js"
 import generateToken from '../../utils/generateToken.js';
 import { exclude } from '../../utils/exclude.js';
 
-export const createUser = async (req, res) => {
+export const createUser = async(req, res) => {
   try {
     const {  email, first_name, last_name, password, phone_number, address, date_of_birth } = req.body;
 
