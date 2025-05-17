@@ -1,72 +1,77 @@
 import { validationResult, body } from "express-validator";
 
-const handleValidationErrors = (
-  req,
-  res,
-  next
-) => {
-  const errors = validationResult(req); // check validation errors from the request
+// Middleware to handle validation errors
+const handleValidationErrors = (req, res, next) => {
+  const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    res.status(422).json({ errors: errors.array() });
-    return; 
+    return res.status(422).json({ errors: errors.array() });
   }
-  next(); // If no errors, proceed to the next middleware or controller
+  next();
 };
 
+// Registration Validation
 export const validateRegister = [
   body("first_name")
+    .trim()
     .notEmpty()
-    .withMessage("Firstname is required")
-    .isString()
-    .withMessage("firstname must be a string"),
+    .withMessage("First name is required")
+    .isAlpha()
+    .withMessage("First name must contain only letters"),
+
   body("last_name")
+    .trim()
     .notEmpty()
-    .withMessage("lastName is required")
-    .isString()
-    .withMessage("LastName must be a string"),
+    .withMessage("Last name is required")
+    .isAlpha()
+    .withMessage("Last name must contain only letters"),
+
   body("email")
+    .normalizeEmail()
     .notEmpty()
     .withMessage("Email is required")
     .isEmail()
     .withMessage("Invalid email format"),
+
   body("password")
     .notEmpty()
     .withMessage("Password is required")
-    .isString()
-    .withMessage("Password must be a string"),
-  handleValidationErrors,
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long"),
+
   body("date_of_birth")
     .notEmpty()
-    .withMessage("Password is required")
-    .isString()
-    .withMessage("Password must be a string"),
-  handleValidationErrors,
+    .withMessage("Date of birth is required")
+    .isISO8601()
+    .withMessage("Date of birth must be in ISO format (YYYY-MM-DD)")
+    .toDate(),
+
   body("address")
+    .trim()
     .notEmpty()
-    .withMessage("Password is required")
+    .withMessage("Address is required")
     .isString()
-    .withMessage("Password must be a string"),
-  handleValidationErrors,
-  body("phone_number")
-    .notEmpty()
-    .withMessage("Phone_Number is required")
-    .isString()
-    .withMessage("PhoneNuber must be a string"),
+    .withMessage("Address must be a string"),
+
+    body('phone_number')
+    .notEmpty().withMessage('Phone number is required')
+    .matches(/^(\+234|0)[789][01]\d{8}$/)
+    .withMessage('Invalid phone number'),
+
   handleValidationErrors,
 ];
 
+// Login Validation
 export const validateLogin = [
   body("email")
+    .normalizeEmail()
     .notEmpty()
     .withMessage("Email is required")
     .isEmail()
     .withMessage("Invalid email format"),
+
   body("password")
     .notEmpty()
-    .withMessage("Password is required")
-    .isString()
-    .withMessage("Password must be a string"),
+    .withMessage("Password is required"),
+
   handleValidationErrors,
 ];
-
-
