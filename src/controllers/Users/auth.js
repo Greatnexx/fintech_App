@@ -3,52 +3,37 @@ import bcrypt from "bcryptjs";
 import generateToken from "../../utils/generateToken.js";
 import redisClient from "../../utils/redisClient.js"; // Assuming you imported this
 import { exclude } from "../../utils/exclude.js";
+import { sendResponse } from "../../utils/responseHelper.js";
 
 export const loginUser = async(req, res) => {
   try {
     const { email, password } = req.body;
 
-    const userExist = await prisma.user.findUnique({ where: { email } });
+    const user_exist = await prisma.user.findUnique({ where: { email } });
 
-    if (!userExist) {
+    if (!user_exist) {
       console.log(`[Login Failed] No user with email: ${email}`);
-      return res.status(404).json({
-        status: false,
-        message: "Invalid credentials",
-        data: null,
-      });
+      return sendResponse(res, 404, false, "Invalid Credentials")
     }
 
-    const isMatch = await bcrypt.compare(password, userExist.password);
-    if (!isMatch) {
+    const is_match = await bcrypt.compare(password, user_exist.password);
+    if (!is_match) {
       console.log(`[Login Failed] Password mismatch for user: ${email}`);
-      return res.status(401).json({
-        status: false,
-        message: "Invalid credentials",
-        data: null,
-      });
+      return sendResponse(res, 400, false, "Invalid Credentials")
     }
 
-    const token = generateToken(userExist.id);
-    const redisKey = `auth_token:${userExist.id}`;
+    const token = generateToken(user_exist.id);
+    const redis_key = `auth_token:${user_exist.id}`;
 
-    await redisClient.set(redisKey, token, {
+    await redisClient.set(redis_key, token, {
       EX: parseInt(process.env.EXP_TIME)
     });
 
-    const userObj = exclude(userExist, ["password", "created_at", "updated_at"]);
+    const user_obj = exclude(user_exist, ["password", "created_at", "updated_at"]);
 
-    return res.status(200).json({
-      status: true,
-      data:{
-          ...userObj,
-          token,
-        },
-        message: "logged in successfully",
-    });
+    return sendResponse(res, 200, true, "logged in successfully", {...user_obj,token})
 
   } catch (error) {
-    console.error("[Login Error]", error);
-    return res.status(500).json({ status: false, message: error.message });
+  sendResponse(res, 500, false, error.message )
   }
 };
