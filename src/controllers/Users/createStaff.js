@@ -4,7 +4,7 @@ import generateToken from '../../utils/generateToken.js';
 import { exclude } from '../../utils/exclude.js';
 import { sendResponse } from '../../utils/responseHelper.js';
 
-export const createUser = async(req, res) => {
+export const createStaff = async(req, res) => {
   try {
     const { email, first_name, last_name, password, phone_number } = req.body;
 
@@ -50,14 +50,14 @@ export const createUser = async(req, res) => {
    
 
     const role = await prisma.roles.findUnique({
-      where: { name: 'regular_user' },
+      where: { name: 'staff' },
     });
 
     if (!role) {
       return sendResponse(res, 500, false, " role not found");
     }
 
-    // This query creates a new entry in the userRoles table, linking the user with the 'regular_user' role.
+    // This query creates a new entry in the userRoles table, linking the user with the 'admin' role.
     // This is done to establish a many-to-many relationship between users and roles.
 
     await prisma.userRoles.create({
@@ -68,14 +68,11 @@ export const createUser = async(req, res) => {
     });
 
     
-
-
-    // Generate auth token
     const token = generateToken(user.id);
 
-    const user_obj = exclude(user_with_roles, ["password"]);
+    const user_obj = exclude(user, ["password"]);
 
-    return sendResponse(res, 201, true, "User registered successfully", { ...user_obj,token });
+    return sendResponse(res, 201, true, "Your signup as a staff was successful", { ...user_obj,token });
   } catch (error) {
     sendResponse(res,500,false,error.message)
   }

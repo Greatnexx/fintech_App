@@ -38,21 +38,44 @@ export const validateRegister = [
     .isLength({ min: 6 })
     .withMessage("Password must be at least 6 characters long"),
 
-  body("date_of_birth")
-    .notEmpty()
-    .withMessage("Date of birth is required")
-    .isISO8601()
-    .withMessage("Date of birth must be in ISO format (YYYY-MM-DD)")
-    .toDate(),
+  
+    body('phone_number')
+    .notEmpty().withMessage('Phone number is required')
+    .matches(/^(\+234|0)[789][01]\d{8}$/)
+    .withMessage('Invalid phone number'),
 
-  body("address")
+  handleValidationErrors,
+];
+
+export const validateStaffRegister = [
+  body("first_name")
     .trim()
     .notEmpty()
-    .withMessage("Address is required")
-    .isString()
-    .withMessage("Address must be a string"),
+    .withMessage("First name is required")
+    .isAlpha()
+    .withMessage("First name must contain only letters"),
 
-    body('phone_number')
+  body("last_name")
+    .trim()
+    .notEmpty()
+    .withMessage("Last name is required")
+    .isAlpha()
+    .withMessage("Last name must contain only letters"),
+
+  body("email")
+    .normalizeEmail()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email format"),
+
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters long"),
+
+  body("phone_number")
     .notEmpty().withMessage('Phone number is required')
     .matches(/^(\+234|0)[789][01]\d{8}$/)
     .withMessage('Invalid phone number'),

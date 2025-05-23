@@ -9,7 +9,17 @@ export const loginUser = async(req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user_exist = await prisma.user.findUnique({ where: { email } });
+// "When fetching a user, also include their roles, and for each role, include the actual role details (from the Role table)."
+
+    const user_exist = await prisma.user.findUnique({ where: { email },
+      include: {
+        roles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+     });
 
     if (!user_exist) {
       console.log(`[Login Failed] No user with email: ${email}`);
@@ -29,9 +39,13 @@ export const loginUser = async(req, res) => {
       EX: parseInt(process.env.EXP_TIME)
     });
 
-    const user_obj = exclude(user_exist, ["password", "created_at", "updated_at"]);
 
-    return sendResponse(res, 200, true, "logged in successfully", {...user_obj,token})
+
+    const user_obj = exclude(user_exist, ["password","roles", "created_at", "updated_at"]);
+    const roleName = user_exist.roles[0]?.role?.name; 
+
+
+    return sendResponse(res, 200, true, "logged in successfully", {...user_obj,role:{roleName},token})
 
   } catch (error) {
   sendResponse(res, 500, false, error.message )

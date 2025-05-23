@@ -22,9 +22,45 @@ model User {
   first_name     String
   last_name      String
   phone_number   String         @unique
-  date_of_birth  DateTime
-  address        String
   password       String
- 
+  profile        UserProfile?
+  roles          UserRoles[]
 }
+
  
+model Roles {
+  id             String         @id() @unique @default(uuid())
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  name           String         @unique
+  users           UserRoles[]
+
+}
+
+model UserRoles {
+  id             String         @id() @unique @default(uuid())
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  user_id        String
+  role_id        String
+  user           User           @relation(fields: [user_id], references: [id])
+  role           Roles          @relation(fields: [role_id], references: [id])
+
+}
+
+model UserProfile {
+  id             String        @id @default(uuid())
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @updatedAt
+  user_id         String       @unique
+  profile_image   String
+  address         String
+  city            String
+  lga             String
+  state           String
+  country         String
+  zip_code        String?
+  marital_status  String
+  date_of_birth   DateTime
+  user            User          @relation(fields: [user_id], references: [id])
+}

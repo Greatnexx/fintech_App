@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { errorHandler, notFound } from "./middlewares/errorHandler.js";
+import { errorHandler, notFound } from "./api/middlewares/errorHandler.js";
 import dotenv from "dotenv";
 import redisClient, { connectRedis } from "./utils/redisClient.js";
 import { userRoutes } from "./routes/index.js";
