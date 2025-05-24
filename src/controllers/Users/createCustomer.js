@@ -67,13 +67,15 @@ export const createUser = async(req, res) => {
       },
     });
 
-    
+    // attach the role name to the user object
+   
+
+    const user_obj = exclude(user, ["password"]);
 
 
     // Generate auth token
     const token = generateToken(user.id);
 
-    const user_obj = exclude(user_with_roles, ["password"]);
 
     return sendResponse(res, 201, true, "User registered successfully", { ...user_obj,token });
   } catch (error) {

@@ -38,7 +38,7 @@ export const createUserProfile = async (req, res) => {
           zip_code,
           marital_status,
           user: {
-            connect: { id: user_id }, // ✅ Link the profile to the current user
+            connect: { id: user_id }, 
           },
         },
       });

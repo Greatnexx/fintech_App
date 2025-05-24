@@ -98,3 +98,46 @@ export const validateLogin = [
 
   handleValidationErrors,
 ];
+
+// Profile Validation
+export const validateProfile = [
+  body("address")
+    .notEmpty()
+    .withMessage("Address is required"),
+
+  body("profile_image")
+    .notEmpty()
+    .withMessage("Profile image is required"),
+
+  body("city")
+    .notEmpty()
+    .withMessage("City is required"),
+
+  body("date_of_birth")
+    .notEmpty()
+    .withMessage("Date of birth is required")
+    .isDate()
+    .withMessage("Invalid date format"),
+
+  body("lga")
+    .notEmpty()
+    .withMessage("LGA is required"),
+
+  body("state")
+    .notEmpty()
+    .withMessage("State is required"),
+
+  body("country")
+    .notEmpty()
+    .withMessage("Country is required"),
+
+  body("zip_code")
+    .notEmpty()
+    .withMessage("Zip code is required"),
+
+  body("marital_status")
+    .notEmpty()
+    .withMessage("Marital status is required"),
+
+  handleValidationErrors,
+]
