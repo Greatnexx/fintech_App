@@ -1,7 +1,7 @@
 
 ## To this Project running
 
-- create a `.env` file in the root and copy the content of `.env.example` into it with the correct credentials
+- create a `.env` file in the root to contain all secret features 
 - make sure your DB is up and running
 - run `npm i` || `yarn`
 - run `npm start:db` if you have dcoker running and wish to server your db using docker, if you are ok spinning up a local db version, you can
