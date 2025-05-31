@@ -4,13 +4,12 @@
   "main": "src/app.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "nodemon --watch src --ext js,prisma --ignore node_modules --exec node src/app.js",
     "start": "node src/app.js",
-    "studio": " npx prisma studio",
-    "start:db": "docker compose up",
     "generate": "npx prisma generate",
     "migrate": "npx prisma migrate dev",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "seed:roles": "node src/prisma/seedRoles.js"
 
 

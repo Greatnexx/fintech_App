@@ -1,5 +1,5 @@
-import bcrypt from 'bcryptjs'
-import prisma from "../../prisma/client.js"
+import bcrypt from 'bcryptjs';
+import prisma from '../../prisma/client.js';
 import generateToken from '../../utils/generateToken.js';
 import { exclude } from '../../utils/exclude.js';
 import { sendResponse } from '../../utils/responseHelper.js';
@@ -13,13 +13,13 @@ export const createStaff = async(req, res,next) => {
       where: {
         OR: [
           { email },
-          { phone_number }
-        ]
-      }
+          { phone_number },
+        ],
+      },
     });
 
     if (user_exist) {
-       return sendResponse(res, 400, false, "User Already Exists")
+      return sendResponse(res, 400, false, 'User Already Exists');
     }
 
     // Hash password
@@ -33,28 +33,25 @@ export const createStaff = async(req, res,next) => {
         last_name,
         password: hashedPassword,
         phone_number,
-        
-        
-      }
+
+      },
     });
 
     if (!user) {
-      return sendResponse(res,500,false,"Failed to register user")
-      
+      return sendResponse(res,500,false,'Failed to register user');
+
     }
 
-    
     // This query fetches the role with the name 'regular_user' from the database.
     // If the role does not exist, it returns an error response.
     // The role is then assigned to the newly created user.
-   
 
     const role = await prisma.roles.findUnique({
       where: { name: 'staff' },
     });
 
     if (!role) {
-      return sendResponse(res, 500, false, " role not found");
+      return sendResponse(res, 500, false, ' role not found');
     }
 
     // This query creates a new entry in the userRoles table, linking the user with the 'admin' role.
@@ -67,12 +64,11 @@ export const createStaff = async(req, res,next) => {
       },
     });
 
-    
     const token = generateToken(user.id);
 
-    const user_obj = exclude(user, ["password"]);
+    const user_obj = exclude(user, ['password']);
 
-    return sendResponse(res, 201, true, "Your signup as a staff was successful", { ...user_obj,token });
+    return sendResponse(res, 201, true, 'Your signup as a staff was successful', { ...user_obj,token });
   } catch (error) {
     next(error);
   }

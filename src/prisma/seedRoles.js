@@ -1,4 +1,4 @@
-import prisma from './client.js'; 
+import prisma from './client.js';
 
 async function seedRoles() {
   try {
@@ -15,9 +15,9 @@ async function seedRoles() {
 
     }
 
-    console.log("Default roles inserted");
   } catch (error) {
-    console.error(" Error seeding roles:", error);
+    // eslint-disable-next-line
+    console.error(' Error seeding roles:', error);
   } finally {
     await prisma.$disconnect();
   }

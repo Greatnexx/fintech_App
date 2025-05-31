@@ -1,8 +1,8 @@
 export const sendResponse = (res, statusCode, status, message, data = null) => {
-    return res.status(statusCode).json({
-      status,
-      message,
-      data
-    });
-  };
-  
+  return res.status(statusCode).json({
+    status,
+    message,
+    data,
+  });
+};
+

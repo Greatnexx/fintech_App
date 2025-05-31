@@ -1,4 +1,4 @@
-import { validationResult, body } from "express-validator";
+import { validationResult, body } from 'express-validator';
 
 // Middleware to handle validation errors
 const handleValidationErrors = (req, res, next) => {
@@ -11,35 +11,34 @@ const handleValidationErrors = (req, res, next) => {
 
 // Registration Validation
 export const validateRegister = [
-  body("first_name")
+  body('first_name')
     .trim()
     .notEmpty()
-    .withMessage("First name is required")
+    .withMessage('First name is required')
     .isAlpha()
-    .withMessage("First name must contain only letters"),
+    .withMessage('First name must contain only letters'),
 
-  body("last_name")
+  body('last_name')
     .trim()
     .notEmpty()
-    .withMessage("Last name is required")
+    .withMessage('Last name is required')
     .isAlpha()
-    .withMessage("Last name must contain only letters"),
+    .withMessage('Last name must contain only letters'),
 
-  body("email")
+  body('email')
     .normalizeEmail()
     .notEmpty()
-    .withMessage("Email is required")
+    .withMessage('Email is required')
     .isEmail()
-    .withMessage("Invalid email format"),
+    .withMessage('Invalid email format'),
 
-  body("password")
+  body('password')
     .notEmpty()
-    .withMessage("Password is required")
+    .withMessage('Password is required')
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long"),
+    .withMessage('Password must be at least 6 characters long'),
 
-  
-    body('phone_number')
+  body('phone_number')
     .notEmpty().withMessage('Phone number is required')
     .matches(/^(\+234|0)[789][01]\d{8}$/)
     .withMessage('Invalid phone number'),
@@ -48,34 +47,34 @@ export const validateRegister = [
 ];
 
 export const validateStaffRegister = [
-  body("first_name")
+  body('first_name')
     .trim()
     .notEmpty()
-    .withMessage("First name is required")
+    .withMessage('First name is required')
     .isAlpha()
-    .withMessage("First name must contain only letters"),
+    .withMessage('First name must contain only letters'),
 
-  body("last_name")
+  body('last_name')
     .trim()
     .notEmpty()
-    .withMessage("Last name is required")
+    .withMessage('Last name is required')
     .isAlpha()
-    .withMessage("Last name must contain only letters"),
+    .withMessage('Last name must contain only letters'),
 
-  body("email")
+  body('email')
     .normalizeEmail()
     .notEmpty()
-    .withMessage("Email is required")
+    .withMessage('Email is required')
     .isEmail()
-    .withMessage("Invalid email format"),
+    .withMessage('Invalid email format'),
 
-  body("password")
+  body('password')
     .notEmpty()
-    .withMessage("Password is required")
+    .withMessage('Password is required')
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long"),
+    .withMessage('Password must be at least 6 characters long'),
 
-  body("phone_number")
+  body('phone_number')
     .notEmpty().withMessage('Phone number is required')
     .matches(/^(\+234|0)[789][01]\d{8}$/)
     .withMessage('Invalid phone number'),
@@ -85,59 +84,59 @@ export const validateStaffRegister = [
 
 // Login Validation
 export const validateLogin = [
-  body("email")
+  body('email')
     .normalizeEmail()
     .notEmpty()
-    .withMessage("Email is required")
+    .withMessage('Email is required')
     .isEmail()
-    .withMessage("Invalid email format"),
+    .withMessage('Invalid email format'),
 
-  body("password")
+  body('password')
     .notEmpty()
-    .withMessage("Password is required"),
+    .withMessage('Password is required'),
 
   handleValidationErrors,
 ];
 
 // Profile Validation
 export const validateProfile = [
-  body("address")
+  body('address')
     .notEmpty()
-    .withMessage("Address is required"),
+    .withMessage('Address is required'),
 
-  body("profile_image")
+  body('profile_image')
     .notEmpty()
-    .withMessage("Profile image is required"),
+    .withMessage('Profile image is required'),
 
-  body("city")
+  body('city')
     .notEmpty()
-    .withMessage("City is required"),
+    .withMessage('City is required'),
 
-  body("date_of_birth")
+  body('date_of_birth')
     .notEmpty()
-    .withMessage("Date of birth is required")
+    .withMessage('Date of birth is required')
     .isDate()
-    .withMessage("Invalid date format"),
+    .withMessage('Invalid date format'),
 
-  body("lga")
+  body('lga')
     .notEmpty()
-    .withMessage("LGA is required"),
+    .withMessage('LGA is required'),
 
-  body("state")
+  body('state')
     .notEmpty()
-    .withMessage("State is required"),
+    .withMessage('State is required'),
 
-  body("country")
+  body('country')
     .notEmpty()
-    .withMessage("Country is required"),
+    .withMessage('Country is required'),
 
-  body("zip_code")
+  body('zip_code')
     .notEmpty()
-    .withMessage("Zip code is required"),
+    .withMessage('Zip code is required'),
 
-  body("marital_status")
+  body('marital_status')
     .notEmpty()
-    .withMessage("Marital status is required"),
+    .withMessage('Marital status is required'),
 
   handleValidationErrors,
-]
+];

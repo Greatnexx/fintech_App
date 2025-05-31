@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import  redisClient  from '../utils/redisClient.js';
 import prisma from '../prisma/client.js';
 
-const protect = async (req, res, next) => {
+const protect = async(req, res, next) => {
   let token;
 
   if (
@@ -28,7 +28,7 @@ const protect = async (req, res, next) => {
       //  Refresh token expiration (sliding expiration)
       await redisClient.expire(
         `auth_token:${userId}`,
-        parseInt(process.env.EXP_TIME)
+        parseInt(process.env.EXP_TIME),
       );
 
       //  fetch the user andd role from the dB
@@ -44,7 +44,6 @@ const protect = async (req, res, next) => {
         },
       });
 
- 
       if (!userWithRole) {
         return res.status(404).json({
           status: false,
@@ -54,17 +53,16 @@ const protect = async (req, res, next) => {
       }
 
       // Attach user + role to req
-      const roleName = userWithRole.roles[0]?.role?.name; 
+      const roleName = userWithRole.roles[0]?.role?.name;
       req.user = {
         ...userWithRole,
         role: roleName,
       };
 
-      
-      
       return next();
 
     } catch (error) {
+      // eslint-disable-next-line
       console.error(error);
       return res.status(401).json({
         status: false,
@@ -81,7 +79,7 @@ const protect = async (req, res, next) => {
   });
 };
 
-const isAdmin = async (req, res, next) => {
+const isAdmin = async(req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     return next();
   } else {
@@ -93,7 +91,7 @@ const isAdmin = async (req, res, next) => {
   }
 };
 
-const isStaff = async (req, res, next) => {
+const isStaff = async(req, res, next) => {
   if (req.user && req.user.role === 'staff') {
     return next();
   } else {
@@ -105,8 +103,7 @@ const isStaff = async (req, res, next) => {
   }
 };
 
-
-const isRegularUser = async (req, res, next) => {
+const isRegularUser = async(req, res, next) => {
   if (req.user && req.user.role === 'regular_user') {
     return next();
   } else {
@@ -116,7 +113,6 @@ const isRegularUser = async (req, res, next) => {
       data: null,
     });
   }
-}
-
+};
 
 export { protect, isAdmin, isRegularUser, isStaff };
