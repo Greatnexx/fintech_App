@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import  redisClient  from '../../utils/redisClient.js';
-import prisma from '../../prisma/client.js';
+import  redisClient  from '../utils/redisClient.js';
+import prisma from '../prisma/client.js';
 
 const protect = async (req, res, next) => {
   let token;
