@@ -3,7 +3,7 @@ import cors from 'cors';
 import { errorHandler, notFound } from './middlewares/errorHandler.js';
 import dotenv from 'dotenv';
 import redisClient, { connectRedis } from './utils/redisClient.js';
-import { userRoutes } from './routes/index.js';
+import  routers  from './routes/index.js';
 // eslint-disable-next-line
 import prisma, { connectDB, disconnectDB } from "./prisma/client.js";
 
@@ -25,7 +25,7 @@ app.get('/test', async(_req, res) => {
   return res.status(200).send('Welcome to client-project-management!');
 });
 
-app.use('/api/v1', userRoutes);
+app.use('/api/v1', routers);
 
 app.use(notFound);
 app.use(errorHandler);

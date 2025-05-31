@@ -9,10 +9,10 @@ import { getUserProfile } from '../controllers/Users/getProfile.js';
 
 const router = express.Router();
 
-router.post('/users/create-customer',validateRegister,createUser);
-router.post('/users/create-staff', validateStaffRegister,createStaff);
-router.post('/users/auth',validateLogin,loginUser);
-router.post('/users/create-profile',protect,validateProfile, createUserProfile);
-router.get('/users/profile',protect,getUserProfile);
+router.post('/create-customer',validateRegister,createUser);
+router.post('/create-staff', validateStaffRegister,createStaff);
+router.post('/auth',validateLogin,loginUser);
+router.post('/create-profile',protect,validateProfile, createUserProfile);
+router.get('/profile',protect,getUserProfile);
 
 export default router;
