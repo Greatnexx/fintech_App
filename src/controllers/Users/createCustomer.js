@@ -4,7 +4,7 @@ import generateToken from '../../utils/generateToken.js';
 import { exclude } from '../../utils/exclude.js';
 import { sendResponse } from '../../utils/responseHelper.js';
 
-export const createUser = async(req, res) => {
+export const createUser = async(req, res,next) => {
   try {
     const { email, first_name, last_name, password, phone_number } = req.body;
 
@@ -79,6 +79,6 @@ export const createUser = async(req, res) => {
 
     return sendResponse(res, 201, true, "User registered successfully", { ...user_obj,token });
   } catch (error) {
-    sendResponse(res,500,false,error.message)
+    next(error);
   }
 };

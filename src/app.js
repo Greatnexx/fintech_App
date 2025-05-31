@@ -7,7 +7,7 @@ import { userRoutes } from "./routes/index.js";
 dotenv.config();
 connectRedis();
 
-const port = process.env.PORT || 4000;
+const port = process.env.APP_PORT || 4000;
 
 const app = express();
 app.use(cors());

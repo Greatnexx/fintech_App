@@ -1,7 +1,7 @@
 import prisma from "../../prisma/client.js";
 import { sendResponse } from "../../utils/responseHelper.js";
 
-export const getUserProfile = async (req, res) => {
+export const getUserProfile = async (req, res,next) => {
   try {
     const user_id = req.user.id;
 
@@ -19,6 +19,7 @@ export const getUserProfile = async (req, res) => {
 
     return sendResponse(res, 200, true, "Profile retrieved successfully", profile);
   } catch (error) {
-    return sendResponse(res, 500, false, error.message);
+   next(error);
+ 
   }
 }

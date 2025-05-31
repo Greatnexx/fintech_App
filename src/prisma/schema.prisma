@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = env("SERVICE_URI")      // since we are using SERVICE_URI from avien where our db is hosted prisma will now interact with the our db hosted on avien
 }
 
 

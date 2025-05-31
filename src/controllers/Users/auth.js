@@ -5,7 +5,7 @@ import redisClient from "../../utils/redisClient.js"; // Assuming you imported t
 import { exclude } from "../../utils/exclude.js";
 import { sendResponse } from "../../utils/responseHelper.js";
 
-export const loginUser = async(req, res) => {
+export const loginUser = async(req, res,next) => {
   try {
     const { email, password } = req.body;
 
@@ -48,6 +48,6 @@ export const loginUser = async(req, res) => {
     return sendResponse(res, 200, true, "logged in successfully", {...user_obj,role:{roleName},token})
 
   } catch (error) {
-  sendResponse(res, 500, false, error.message )
+      next(error)
   }
 };

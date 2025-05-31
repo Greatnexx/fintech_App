@@ -2,7 +2,7 @@ import  prisma  from "../../prisma/client.js";
 import { sendResponse } from "../../utils/responseHelper.js";
 
 
-export const createUserProfile = async (req, res) => {
+export const createUserProfile = async (req, res,next) => {
   try {
     const user_id = req.user.id;
 
@@ -46,7 +46,8 @@ export const createUserProfile = async (req, res) => {
 
     return sendResponse(res, 201, true, "Profile created successfully", newProfile);
   } catch (error) {
-  return  sendResponse(res, 500, false, error.message);
+    next(error);
+   
    
   }
 };
