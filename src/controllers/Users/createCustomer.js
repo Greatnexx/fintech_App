@@ -71,7 +71,7 @@ export const createUser = async(req, res,next) => {
     // Generate auth token
     const token = generateToken(user.id);
 
-    return sendResponse(res, 201, true, 'User registered successfully', { ...user_obj,token });
+    return sendResponse( res,201, true, 'User registered successfully', { ...user_obj,token });
   } catch (error) {
     next(error);
   }
