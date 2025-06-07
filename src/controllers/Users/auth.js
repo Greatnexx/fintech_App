@@ -5,6 +5,7 @@ import redisClient from '../../utils/redisClient.js'; // Assuming you imported t
 import { exclude } from '../../utils/exclude.js';
 import { sendResponse } from '../../utils/responseHelper.js';
 
+
 export const loginUser = async(req, res,next) => {
   try {
     const { email, password } = req.body;
@@ -52,3 +53,4 @@ export const loginUser = async(req, res,next) => {
     next(error);
   }
 };
+
