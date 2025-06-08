@@ -23,6 +23,7 @@ model User {
   last_name      String
   phone_number   String         @unique
   password       String
+  lastLogin      DateTime?
   profile        UserProfile?
   roles          UserRoles[]
 }

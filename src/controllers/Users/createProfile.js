@@ -46,8 +46,8 @@ export const createUserProfile = async(req, res,next) => {
     // In Prisma, connect is used to link an existing record (in another table/model) via a relation.
     // The connect keyword is telling Prisma:
 
-// “Hey, I’m not creating a new user. I want to link this profile to an already existing user whose ID is user_id.”
-// So Prisma will find the user with that id in the User table and associate this profile with them.
+    // “Hey, I’m not creating a new user. I want to link this profile to an already existing user whose ID is user_id.”
+    // So Prisma will find the user with that id in the User table and associate this profile with them.
 
     return sendResponse(res, 201, true, 'Profile created successfully', newProfile);
   } catch (error) {

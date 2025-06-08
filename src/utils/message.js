@@ -1,5 +1,5 @@
 export const otpMessage = (name, otp) => {
-	return `
+  return `
   <!DOCTYPE html>
   <html lang="en">
       <head>
@@ -113,7 +113,6 @@ export const otpMessage = (name, otp) => {
               `;
 };
 
-
 export const loginMessage = (name, date) => {
   return `
   <!DOCTYPE html>
@@ -213,10 +212,9 @@ export const loginMessage = (name, date) => {
                   </p>
 
 
-                  <h4>Need help?</h4>
-                  <p class="m-text">If you have any questions or need assistance, please contact our support team at <a href="mailto:info@247bitoption.com">info@247bitoption.com</a></p>
+                  <p class="m-text">If this wasn't you, please reset your password immediately.</p>
 
-                  <p>Thank you for choosing 247Bitoption! We're excited to have you as part of our community.</p>
+                  <p>Thank you for choosing swift_pay! We're excited to have you as part of our community.</p>
   
               </div>
               <div class="footer">
@@ -230,8 +228,4 @@ export const loginMessage = (name, date) => {
   
               `;
 };
-
-
-
-
 

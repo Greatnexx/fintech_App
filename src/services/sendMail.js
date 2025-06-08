@@ -1,11 +1,10 @@
 // import nodemailer from 'nodemailer'
-import nodemailer from 'nodemailer'
-
+import nodemailer from 'nodemailer';
 
 async function sendMail(to, subject, html) {
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: 'gmail',
       auth: {
         user:process.env.SMTP_EMAIL,
         pass: process.env.SMTP_PASSWORD,
@@ -25,7 +24,7 @@ async function sendMail(to, subject, html) {
     //   }
     // });
 
-    let mailOptions = {
+    const mailOptions = {
       from: `Swift_Pay <${process.env.SMTP_EMAIL}>`,
       to: to,
       subject: subject,
@@ -33,10 +32,12 @@ async function sendMail(to, subject, html) {
     };
 
     const info = await transporter.sendMail(mailOptions);
+    // eslint-disable-next-line
     console.log('Message sent: %s', info.messageId);
   } catch (error) {
+    // eslint-disable-next-line
     console.error('Error sending email:', error);
   }
 }
 
-export default sendMail
+export default sendMail;

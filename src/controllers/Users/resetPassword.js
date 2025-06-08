@@ -1,14 +1,14 @@
-import bcrypt from "bcryptjs";
-import prisma from "../../prisma/client.js";
-import { sendResponse } from "../../utils/responseHelper.js";
+import bcrypt from 'bcryptjs';
+import prisma from '../../prisma/client.js';
+import { sendResponse } from '../../utils/responseHelper.js';
 
-export const resetPassword = async (req, res, next) => {
+export const resetPassword = async(req, res, next) => {
   try {
     const { email, newPassword } = req.body;
 
     const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
-      return sendResponse(res, 404, false, "User not found");
+      return sendResponse(res, 404, false, 'User not found');
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -18,7 +18,7 @@ export const resetPassword = async (req, res, next) => {
       data: { password: hashedPassword },
     });
 
-    return sendResponse(res, 200, true, "Password reset successfully");
+    return sendResponse(res, 200, true, 'Password reset successfully');
   } catch (error) {
     next(error);
   }

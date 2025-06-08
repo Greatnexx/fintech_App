@@ -18,8 +18,8 @@ router.post('/auth',validateLogin,loginUser);
 router.post('/create-profile',protect,validateProfile, createUserProfile);
 router.get('/profile',protect,getUserProfile);
 router.post('/validate-account',validateAccount);
-router.post('/validate-otp',verifyOtp)
-router.post('/validate-otp',verifyOtp)
-router.post('/reset-password',resetPassword)
+router.post('/validate-otp',verifyOtp);
+router.post('/validate-otp',verifyOtp);
+router.post('/reset-password',resetPassword);
 
 export default router;
