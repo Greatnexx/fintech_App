@@ -6,6 +6,155 @@ import { exclude } from '../../utils/exclude.js';
 import { sendResponse } from '../../utils/responseHelper.js';
 import sendMail from '../../services/sendMail.js';
 import { loginMessage } from '../../utils/message.js';
+import { sendOtpToEmail } from '../../utils/otpHelper.js';
+
+
+
+
+
+export const createUser = async(req, res,next) => {
+  try {
+    const { email, first_name, last_name, password, phone_number } = req.body;
+
+    // Check if user already exists by email or username
+    const user_exist = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { phone_number },
+        ],
+      },
+    });
+
+    if (user_exist) {
+      return sendResponse(res, 400, false, 'User Already Exists');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user in database
+    const user = await prisma.user.create({
+      data: {
+        email,
+        first_name,
+        last_name,
+        password: hashedPassword,
+        phone_number,
+
+      },
+    });
+
+    if (!user) {
+      return sendResponse(res,500,false,'Failed to register user');
+
+    }
+
+    // This query fetches the role with the name 'regular_user' from the database.
+    // If the role does not exist, it returns an error response.
+    // The role is then assigned to the newly created user.
+
+    const role = await prisma.roles.findUnique({
+      where: { name: 'regular_user' },
+    });
+
+    if (!role) {
+      return sendResponse(res, 500, false, ' role not found');
+    }
+
+    // This query creates a new entry in the userRoles table, linking the user with the 'regular_user' role.
+    // This is done to establish a many-to-many relationship between users and roles.
+
+    await prisma.userRoles.create({
+      data: {
+        user_id: user.id,
+        role_id: role.id,
+      },
+    });
+
+    // attach the role name to the user object
+
+    const user_obj = exclude(user, ['password']);
+
+    // Generate auth token
+    const token = generateToken(user.id);
+
+    return sendResponse( res,201, true, 'User registered successfully', { ...user_obj,token });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const createStaff = async(req, res,next) => {
+  try {
+    const { email, first_name, last_name, password, phone_number } = req.body;
+
+    // Check if user already exists by email or username
+    const user_exist = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { phone_number },
+        ],
+      },
+    });
+
+    if (user_exist) {
+      return sendResponse(res, 400, false, 'User Already Exists');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create user in database
+    const user = await prisma.user.create({
+      data: {
+        email,
+        first_name,
+        last_name,
+        password: hashedPassword,
+        phone_number,
+
+      },
+    });
+
+    if (!user) {
+      return sendResponse(res,500,false,'Failed to register user');
+
+    }
+
+    // This query fetches the role with the name 'regular_user' from the database.
+    // If the role does not exist, it returns an error response.
+    // The role is then assigned to the newly created user.
+
+    const role = await prisma.roles.findUnique({
+      where: { name: 'staff' },
+    });
+
+    if (!role) {
+      return sendResponse(res, 500, false, ' role not found');
+    }
+
+    // This query creates a new entry in the userRoles table, linking the user with the 'admin' role.
+    // This is done to establish a many-to-many relationship between users and roles.
+
+    await prisma.userRoles.create({
+      data: {
+        user_id: user.id,
+        role_id: role.id,
+      },
+    });
+
+    const token = generateToken(user.id);
+
+    const user_obj = exclude(user, ['password']);
+
+    return sendResponse(res, 201, true, 'Your signup as a staff was successful', { ...user_obj,token });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const loginUser = async(req, res, next) => {
   try {
@@ -77,6 +226,88 @@ export const loginUser = async(req, res, next) => {
       role: { roleName },
       token,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const resetPassword = async(req, res, next) => {
+  try {
+    const { email, newPassword } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return sendResponse(res, 404, false, 'User not found');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await prisma.user.update({
+      where: { email },
+      data: { password: hashedPassword },
+    });
+
+    return sendResponse(res, 200, true, 'Password reset successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const validateAccount = async(req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return sendResponse(res, 404, false, 'User not found');
+    }
+      
+   await sendOtpToEmail(user);
+
+
+    return sendResponse(
+      res,
+      200,
+      true,
+      'OTP sent successfully',
+      user.email,
+    );
+  } catch (error) {
+    next(error);
+  }
+}; 
+
+
+export const verifyOtp = async(req, res, next) => {
+  try {
+    // Extract email and OTP from request body we are including email instead of only otp because we need to check if the user exists in the database
+
+    const { email, otp } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (!user) {
+      return sendResponse(res, 404, false, 'User not found');
+    }
+
+    const redis_key = `otp:${email}`;
+    const savedOtp = await redisClient.get(redis_key);
+
+    if (!savedOtp) {
+      return sendResponse(res, 400, false, 'OTP expired or not found');
+    }
+
+    if (savedOtp !== otp) {
+      return sendResponse(res, 400, false, 'Invalid OTP');
+    }
+
+    //  delete the OTP once it is verified ensuring it can't be used again
+    await redisClient.del(redis_key);
+
+    return sendResponse(res, 200, true, 'OTP verified successfully');
+
   } catch (error) {
     next(error);
   }
