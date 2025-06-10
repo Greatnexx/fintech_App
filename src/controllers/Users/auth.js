@@ -8,17 +8,14 @@ import sendMail from '../../services/sendMail.js';
 import { loginMessage } from '../../utils/message.js';
 import { sendOtpToEmail } from '../../utils/otpHelper.js';
 
-export const createUser = async(req, res,next) => {
+export const createUser = async(req, res, next) => {
   try {
     const { email, first_name, last_name, password, phone_number } = req.body;
 
     // Check if user already exists by email or username
     const user_exist = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email },
-          { phone_number },
-        ],
+        OR: [{ email }, { phone_number }],
       },
     });
 
@@ -37,13 +34,11 @@ export const createUser = async(req, res,next) => {
         last_name,
         password: hashedPassword,
         phone_number,
-
       },
     });
 
     if (!user) {
-      return sendResponse(res,500,false,'Failed to register user');
-
+      return sendResponse(res, 500, false, 'Failed to register user');
     }
 
     // This query fetches the role with the name 'regular_user' from the database.
@@ -75,23 +70,23 @@ export const createUser = async(req, res,next) => {
     // Generate auth token
     const token = generateToken(user.id);
 
-    return sendResponse( res,201, true, 'User registered successfully', { ...user_obj,token });
+    return sendResponse(res, 201, true, 'User registered successfully', {
+      ...user_obj,
+      token,
+    });
   } catch (error) {
     next(error);
   }
 };
 
-export const createStaff = async(req, res,next) => {
+export const createStaff = async(req, res, next) => {
   try {
     const { email, first_name, last_name, password, phone_number } = req.body;
 
     // Check if user already exists by email or username
     const user_exist = await prisma.user.findFirst({
       where: {
-        OR: [
-          { email },
-          { phone_number },
-        ],
+        OR: [{ email }, { phone_number }],
       },
     });
 
@@ -110,13 +105,11 @@ export const createStaff = async(req, res,next) => {
         last_name,
         password: hashedPassword,
         phone_number,
-
       },
     });
 
     if (!user) {
-      return sendResponse(res,500,false,'Failed to register user');
-
+      return sendResponse(res, 500, false, 'Failed to register user');
     }
 
     // This query fetches the role with the name 'regular_user' from the database.
@@ -145,7 +138,13 @@ export const createStaff = async(req, res,next) => {
 
     const user_obj = exclude(user, ['password']);
 
-    return sendResponse(res, 201, true, 'Your signup as a staff was successful', { ...user_obj,token });
+    return sendResponse(
+      res,
+      201,
+      true,
+      'Your signup as a staff was successful',
+      { ...user_obj, token },
+    );
   } catch (error) {
     next(error);
   }
@@ -258,13 +257,7 @@ export const validateAccount = async(req, res, next) => {
 
     await sendOtpToEmail(user);
 
-    return sendResponse(
-      res,
-      200,
-      true,
-      'OTP sent successfully',
-      user.email,
-    );
+    return sendResponse(res, 200, true, 'OTP sent successfully', user.email);
   } catch (error) {
     next(error);
   }
@@ -298,7 +291,6 @@ export const verifyOtp = async(req, res, next) => {
     await redisClient.del(redis_key);
 
     return sendResponse(res, 200, true, 'OTP verified successfully');
-
   } catch (error) {
     next(error);
   }

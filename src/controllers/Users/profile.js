@@ -1,7 +1,7 @@
-import  prisma  from '../../prisma/client.js';
+import prisma from '../../prisma/client.js';
 import { sendResponse } from '../../utils/responseHelper.js';
 
-export const createUserProfile = async(req, res,next) => {
+export const createUserProfile = async(req, res, next) => {
   try {
     const user_id = req.user.id;
 
@@ -49,21 +49,26 @@ export const createUserProfile = async(req, res,next) => {
     // “Hey, I’m not creating a new user. I want to link this profile to an already existing user whose ID is user_id.”
     // So Prisma will find the user with that id in the User table and associate this profile with them.
 
-    return sendResponse(res, 201, true, 'Profile created successfully', newProfile);
+    return sendResponse(
+      res,
+      201,
+      true,
+      'Profile created successfully',
+      newProfile,
+    );
   } catch (error) {
     next(error);
-
   }
 };
 
-export const getUserProfile = async(req, res,next) => {
+export const getUserProfile = async(req, res, next) => {
   try {
     const user_id = req.user.id;
 
     // Fetch the user profile from the database
     const profile = await prisma.user.findUnique({
       where: { id: user_id },
-      include:{
+      include: {
         profile: true,
       },
     });
@@ -72,10 +77,15 @@ export const getUserProfile = async(req, res,next) => {
       return sendResponse(res, 404, false, 'Profile not found');
     }
 
-    return sendResponse(res, 200, true, 'Profile retrieved successfully', profile);
+    return sendResponse(
+      res,
+      200,
+      true,
+      'Profile retrieved successfully',
+      profile,
+    );
   } catch (error) {
     next(error);
-
   }
 };
 
