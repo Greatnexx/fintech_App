@@ -1,0 +1,33 @@
+name: Node.js CI
+
+# This means Run CI (tests, build) on every push to those branches or PR to:# develop, beta, or main branches, and any feature branches.
+
+on:
+  push:
+    branches: [ develop, beta, main, 'feature/**' ]  
+  pull_request:
+    branches: [ develop, beta, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Run Linter
+        run: npm run lint
+
+     
