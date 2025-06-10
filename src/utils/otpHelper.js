@@ -1,13 +1,13 @@
 // utils/otpHelper.js
-import redisClient from "../utils/redisClient.js";
-import randomstring from "randomstring";
-import sendMail from "../services/sendMail.js";
-import { otpMessage } from "./message.js";
+import redisClient from '../utils/redisClient.js';
+import randomstring from 'randomstring';
+import sendMail from '../services/sendMail.js';
+import { otpMessage } from './message.js';
 
-export const sendOtpToEmail = async (user) => {
+export const sendOtpToEmail = async(user) => {
   const otp = randomstring.generate({
     length: 6,
-    charset: "numeric",
+    charset: 'numeric',
   });
 
   const redis_key = `otp:${user.email}`;
@@ -17,8 +17,8 @@ export const sendOtpToEmail = async (user) => {
 
   await sendMail(
     user.email,
-    "Account Validation",
-    otpMessage(user.first_name, otp)
+    'Account Validation',
+    otpMessage(user.first_name, otp),
   );
   return otp;
 };

@@ -56,7 +56,6 @@ export const createUserProfile = async(req, res,next) => {
   }
 };
 
-
 export const getUserProfile = async(req, res,next) => {
   try {
     const user_id = req.user.id;
