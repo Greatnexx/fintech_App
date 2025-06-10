@@ -8,10 +8,6 @@ import sendMail from '../../services/sendMail.js';
 import { loginMessage } from '../../utils/message.js';
 import { sendOtpToEmail } from '../../utils/otpHelper.js';
 
-
-
-
-
 export const createUser = async(req, res,next) => {
   try {
     const { email, first_name, last_name, password, phone_number } = req.body;
@@ -84,7 +80,6 @@ export const createUser = async(req, res,next) => {
     next(error);
   }
 };
-
 
 export const createStaff = async(req, res,next) => {
   try {
@@ -231,7 +226,6 @@ export const loginUser = async(req, res, next) => {
   }
 };
 
-
 export const resetPassword = async(req, res, next) => {
   try {
     const { email, newPassword } = req.body;
@@ -254,7 +248,6 @@ export const resetPassword = async(req, res, next) => {
   }
 };
 
-
 export const validateAccount = async(req, res, next) => {
   try {
     const { email } = req.body;
@@ -262,9 +255,8 @@ export const validateAccount = async(req, res, next) => {
     if (!user) {
       return sendResponse(res, 404, false, 'User not found');
     }
-      
-   await sendOtpToEmail(user);
 
+    await sendOtpToEmail(user);
 
     return sendResponse(
       res,
@@ -276,8 +268,7 @@ export const validateAccount = async(req, res, next) => {
   } catch (error) {
     next(error);
   }
-}; 
-
+};
 
 export const verifyOtp = async(req, res, next) => {
   try {

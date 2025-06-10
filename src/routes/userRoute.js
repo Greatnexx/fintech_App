@@ -4,7 +4,6 @@ import { createUserProfile, getUserProfile } from '../controllers/Users/profile.
 import { createStaff, loginUser, resetPassword, validateAccount, verifyOtp } from '../controllers/Users/auth.js';
 import { protect } from '../middlewares/authMiddleWare.js';
 
-
 const router = express.Router();
 
 router.post('/create-customer',validateRegister,protect,createUserProfile);
