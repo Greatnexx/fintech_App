@@ -1,7 +1,6 @@
 // import nodemailer from 'nodemailer'
 import nodemailer from 'nodemailer';
 
-
 async function sendMail(to, subject, html) {
   try {
     // Create test account
@@ -26,14 +25,14 @@ async function sendMail(to, subject, html) {
     };
 
     const info = await transporter.sendMail(mailOptions);
-
-    console.log(' Email sent (fake):', info.messageId);
+    //  eslint-disable-next-line no-console
     console.log('🔍 Preview URL:', nodemailer.getTestMessageUrl(info));
   } catch (error) {
-    console.error(' Error sending fake email:', error);
+    // eslint-disable-next-line no-console
+    console.error('Error sending email:', error);
+    throw new Error('Failed to send email');
   }
 }
 
 export default sendMail;
-
 

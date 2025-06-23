@@ -13,9 +13,8 @@ router.post('/create-profile',protect,validateProfile, createUserProfile);
 router.get('/profile',protect,getUserProfile);
 router.post('/verify-email-otp',verifyRegistrationOtp);
 router.post('/resend-verification-otp', resendOtp);
-router.post('/request-password-reset', validateAccount); 
+router.post('/request-password-reset', validateAccount);
 router.post('/verify-reset-otp', verifyResetPasswordOtp);
 router.post('/reset-password', resetPassword);
-
 
 export default router;

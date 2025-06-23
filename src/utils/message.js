@@ -88,7 +88,6 @@ export const otpMessage = (name, otp) => {
   `;
 };
 
-
 export const loginMessage = (name, date) => {
   return `
   <!DOCTYPE html>
@@ -177,7 +176,6 @@ export const loginMessage = (name, date) => {
   </html>
   `;
 };
-
 
 export const confirmRegistrationMessage = (name, otp) => {
   return `
@@ -269,8 +267,6 @@ export const confirmRegistrationMessage = (name, otp) => {
   </html>
   `;
 };
-
-
 
 export const registerMessage = (name) => {
   return `
@@ -467,7 +463,6 @@ export const confirmTransferMessage = (name, otp) => {
   `;
 };
 
-
 export const validateAccountMessage = (name, otp) => {
   return `
   <!DOCTYPE html>
@@ -561,8 +556,7 @@ export const validateAccountMessage = (name, otp) => {
     </body>
   </html>
   `;
-}
-
+};
 
 export const withdrawalConfirmationMessage = (name,otp) => {
   return `
@@ -636,4 +630,4 @@ export const withdrawalConfirmationMessage = (name,otp) => {
     </body>
   </html>
   `;
-}
+};

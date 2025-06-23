@@ -1,16 +1,16 @@
-import prisma from "../../prisma/client.js";
-import pkg from "@prisma/client";
+import prisma from '../../prisma/client.js';
+import pkg from '@prisma/client';
 const { MoneyFlow, TransactionType, TransactionStatus } = pkg;
-import { sendResponse } from "../../utils/responseHelper.js";
-import { v4 as uuidv4 } from "uuid";
+import { sendResponse } from '../../utils/responseHelper.js';
+import { v4 as uuidv4 } from 'uuid';
 import {
   deleteOtp,
   getSavedOtp,
   sendOtpToEmail,
-} from "../../utils/otpHelper.js";
-import { withdrawalConfirmationMessage } from "../../utils/message.js";
+} from '../../utils/otpHelper.js';
+import { withdrawalConfirmationMessage } from '../../utils/message.js';
 
-export const initiateWithdrawal = async (req, res, next) => {
+export const initiateWithdrawal = async(req, res, next) => {
   try {
     const { amount, narration } = req.body;
     const user_id = req.user.id;
@@ -21,18 +21,18 @@ export const initiateWithdrawal = async (req, res, next) => {
     });
 
     if (!user) {
-      return sendResponse(res, 404, false, "User not found");
+      return sendResponse(res, 404, false, 'User not found');
     }
 
     if (!user.wallet) {
-      return sendResponse(res, 404, false, "Wallet not found");
+      return sendResponse(res, 404, false, 'Wallet not found');
     }
 
     if (user.wallet.balance < amount) {
-      return sendResponse(res, 400, false, "Insufficient balance");
+      return sendResponse(res, 400, false, 'Insufficient balance');
     }
     if (!amount || amount <= 0) {
-      return sendResponse(res, 400, false, "Invalid Amount");
+      return sendResponse(res, 400, false, 'Invalid Amount');
     }
 
     const reference = `WD-${uuidv4()}`;
@@ -49,23 +49,20 @@ export const initiateWithdrawal = async (req, res, next) => {
           connect: { id: user_id },
         },
         wallet: {
-            connect: { id: user.wallet.id },
+          connect: { id: user.wallet.id },
         },
       },
     });
     const redis_key = `otp:${reference}`;
 
-  const otp=  await sendOtpToEmail(
+    await sendOtpToEmail(
       user,
-      "Withdrawal Confirmation",
+      'Withdrawal Confirmation',
       withdrawalConfirmationMessage,
-      redis_key
+      redis_key,
     );
 
-
-    console.log("OTP sent:", otp);
-
-    return sendResponse(res, 200, true, "Withdrawal initiated successfully", {
+    return sendResponse(res, 200, true, 'Withdrawal initiated successfully', {
       reference,
       amount,
     });
@@ -74,7 +71,7 @@ export const initiateWithdrawal = async (req, res, next) => {
   }
 };
 
-export const verifyWithdrawal = async (req, res, next) => {
+export const verifyWithdrawal = async(req, res, next) => {
   try {
     const user_id = req.user.id;
     const { reference, otp } = req.body;
@@ -88,19 +85,19 @@ export const verifyWithdrawal = async (req, res, next) => {
         res,
         404,
         false,
-        "Transaction not found or unauthorized"
+        'Transaction not found or unauthorized',
       );
     }
 
     if (transaction.status !== TransactionStatus.PENDING) {
-      return sendResponse(res, 400, false, "Transaction already processed");
+      return sendResponse(res, 400, false, 'Transaction already processed');
     }
 
     const redis_key = `otp:${reference}`;
     const savedOtp = await getSavedOtp(redis_key);
 
     if (!savedOtp || savedOtp !== otp) {
-      return sendResponse(res, 400, false, "Invalid or expired OTP");
+      return sendResponse(res, 400, false, 'Invalid or expired OTP');
     }
 
     const wallet = await prisma.wallet.findUnique({
@@ -108,10 +105,10 @@ export const verifyWithdrawal = async (req, res, next) => {
     });
 
     if (!wallet || wallet.balance < transaction.amount) {
-      return sendResponse(res, 400, false, "Insufficient funds");
+      return sendResponse(res, 400, false, 'Insufficient funds');
     }
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async(tx) => {
       // Deduct from wallet
       await tx.wallet.update({
         where: { id: wallet.id },
@@ -129,7 +126,7 @@ export const verifyWithdrawal = async (req, res, next) => {
 
     await deleteOtp(redis_key);
 
-    return sendResponse(res, 200, true, "Withdrawal successful");
+    return sendResponse(res, 200, true, 'Withdrawal successful');
   } catch (error) {
     next(error);
   }

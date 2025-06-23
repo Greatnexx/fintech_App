@@ -1,4 +1,4 @@
-import express from 'express'
+import express from 'express';
 import { initiateDeposit } from '../controllers/Transactions/deposit.js';
 import { protect } from '../middlewares/authMiddleWare.js';
 import { initiateTransfer, verifyTransfer } from '../controllers/Transactions/transfer.js';
@@ -12,7 +12,4 @@ router.post('/verify-transfer',protect, verifyTransfer);
 router.post('/withdrawal',protect, initiateWithdrawal);
 router.post('/verify-withdrawal',protect, verifyWithdrawal);
 
-
-
-
-export default router
+export default router;
