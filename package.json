@@ -8,6 +8,7 @@
     "start": "node src/app.js",
     "generate": "npx prisma generate",
     "migrate": "npx prisma migrate dev",
+    "reset": "npx prisma migrate reset dev",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "seed:roles": "node src/prisma/seedRoles.js"
@@ -21,6 +22,7 @@
   "description": "A fintech Application that allow users perfrom Quick and fast transactions on thier devices",
   "dependencies": {
     "@prisma/client": "^6.5.0",
+    "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
