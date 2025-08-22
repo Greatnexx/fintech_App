@@ -87,6 +87,8 @@ model Wallet {
 }
 model Transaction {
   id           String            @id @default(uuid())
+  created_at    DateTime          @default(now())
+  updated_at     DateTime        @updatedAt
   type         TransactionType
   status       TransactionStatus
   amount       Float
@@ -96,10 +98,12 @@ model Transaction {
   sender_id    String?
   receiver     User?             @relation("ReceivedTransactions", fields: [receiver_id], references: [id])
   receiver_id  String?
-  createdAt    DateTime          @default(now())
   wallet_id    String
   money_flow  MoneyFlow          @default(CREDIT) 
   wallet       Wallet            @relation(fields: [wallet_id], references: [id])
+  balance_before Float           @default(0)
+  balance_after  Float           @default(0)
+  transaction_date DateTime      @default(now())
 }
 
 
@@ -109,7 +113,7 @@ enum UserStatus {
   PENDING_VERIFICATION
   ACTIVE
   BLOCKED
-  SUSPENDED
+   
 }
 
 enum TransactionType {

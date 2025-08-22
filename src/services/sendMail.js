@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer';
 
 async function sendMail(to, subject, html) {
   try {
-    // Create test account
+    // Create test account with etheral
     const testAccount = await nodemailer.createTestAccount();
 
     // Create a fake SMTP transporter
@@ -26,7 +26,7 @@ async function sendMail(to, subject, html) {
 
     const info = await transporter.sendMail(mailOptions);
     //  eslint-disable-next-line no-console
-    console.log('🔍 Preview URL:', nodemailer.getTestMessageUrl(info));
+    console.log(' Preview URL:', nodemailer.getTestMessageUrl(info));
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error sending email:', error);

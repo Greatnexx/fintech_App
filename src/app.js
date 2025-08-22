@@ -6,6 +6,7 @@ import redisClient, { connectRedis } from './utils/redisClient.js';
 import  routers  from './routes/index.js';
 // eslint-disable-next-line
 import prisma, { connectDB, disconnectDB } from "./prisma/client.js";
+import { handlePaystackWebhook } from './controllers/Transactions/webhook.js';
 
 dotenv.config();
 
@@ -16,6 +17,16 @@ connectDB();
 const port = process.env.APP_PORT || 4000;
 
 const app = express();
+
+
+// This tells Express: “accept raw JSON from paystack and forward it to handlePaystackWebhook.”
+app.post(
+  "/api/v1/paystack/webhook",
+  express.raw({ type: "application/json" }),
+  handlePaystackWebhook
+);
+
+
 app.use(cors());
 app.use(express.json());
 

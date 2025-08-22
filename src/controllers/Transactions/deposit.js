@@ -3,7 +3,7 @@ import pkg from '@prisma/client';
 import prisma from '../../prisma/client.js';
 const {  TransactionStatus, TransactionType } = pkg;
 import { sendResponse } from '../../utils/responseHelper.js';
-import axios from 'axios';
+import { initializePaystackTransaction } from '../../utils/paystack.js';
 
 export const initiateDeposit = async(req, res,next) => {
   try {
@@ -15,11 +15,13 @@ export const initiateDeposit = async(req, res,next) => {
     });
 
     if (!user) {
-      return sendResponse(res, 400, false, 'User not found');
+      return sendResponse(res, 400, false, "User not found");
     }
+    // Validate amount
+
 
     if (!amount || amount <= 0) {
-      return sendResponse(res, 400, false, 'Invalid Amount');
+      return sendResponse(res, 400, false, "Invalid Amount");
     }
 
     // We create a unique reference number so we can later say: “Hey Paystack, what happened to this exact transaction”
@@ -32,10 +34,12 @@ export const initiateDeposit = async(req, res,next) => {
     });
 
     if (!wallet) {
-      return sendResponse(res, 404, false, 'Wallet not found');
+      return sendResponse(res, 400, false, "Wallet not found");
     }
 
     // Create pending transaction in the database
+    // wallet_id – where you’ll credit when verification succeeds.
+    // sender_id – who initiated it (owner of the wallet).
     await prisma.transaction.create({
       data: {
         type: TransactionType.DEPOSIT,
@@ -43,47 +47,35 @@ export const initiateDeposit = async(req, res,next) => {
         amount: parseFloat(amount),
         narration,
         reference,
+        balance_before: wallet.balance,
+        balance_after: wallet.balance + parseFloat(amount),
         wallet_id: wallet.id,
         sender_id: user_id,
       },
     });
 
     // Now we call Paystack to initiate the transaction
-    // We send the user’s email, amount, and reference to Paystack
-    // Paystack will then return an authorization URL that we can redirect the user to
-    // so they can complete the payment process
-    // We also include metadata so we can later link the transaction back to the user and wallet
-    // Note: Paystack expects amounts in kobo, so we multiply by 100
-
-    const paystackRes = await axios.post(
-      'https://api.paystack.co/transaction/initialize',
-      {
-        email: user.email,
-        amount: amount * 100,
-        reference,
-        metadata: {
-          user_id,
-          wallet_id: wallet.id,
-        },
+    const paystackRes = await initializePaystackTransaction({
+      email: user.email,
+      amount,
+      reference,
+      metadata: {
+        user_id,
+        wallet_id: wallet.id,
       },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-          'Content-Type': 'application/json',
-        },
-      },
-    );
+    });
 
     // If Paystack returns a successful response, we extract the authorization URL which the user will use to complete the payment
 
-    const authUrl = paystackRes.data.data.authorization_url;
+    const authUrl = paystackRes.data?.authorization_url;
 
     // We redirect the user to the authorization URL
-    return sendResponse(res, 200, true, 'Deposit initiated', {
+    return sendResponse(res, 200, true, "Deposit initiated", {
       reference,
       authorization_url: authUrl,
     });
   } catch (error) {
+
     next(error);
   }
 };
