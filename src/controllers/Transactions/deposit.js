@@ -15,13 +15,12 @@ export const initiateDeposit = async(req, res,next) => {
     });
 
     if (!user) {
-      return sendResponse(res, 400, false, "User not found");
+      return sendResponse(res, 400, false, 'User not found');
     }
     // Validate amount
 
-
     if (!amount || amount <= 0) {
-      return sendResponse(res, 400, false, "Invalid Amount");
+      return sendResponse(res, 400, false, 'Invalid Amount');
     }
 
     // We create a unique reference number so we can later say: “Hey Paystack, what happened to this exact transaction”
@@ -34,7 +33,7 @@ export const initiateDeposit = async(req, res,next) => {
     });
 
     if (!wallet) {
-      return sendResponse(res, 400, false, "Wallet not found");
+      return sendResponse(res, 400, false, 'Wallet not found');
     }
 
     // Create pending transaction in the database
@@ -70,7 +69,7 @@ export const initiateDeposit = async(req, res,next) => {
     const authUrl = paystackRes.data?.authorization_url;
 
     // We redirect the user to the authorization URL
-    return sendResponse(res, 200, true, "Deposit initiated", {
+    return sendResponse(res, 200, true, 'Deposit initiated', {
       reference,
       authorization_url: authUrl,
     });

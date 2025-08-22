@@ -1,4 +1,6 @@
-export const getAllTransactions = async (req, res, next) => {
+import prisma from '../../prisma/client';
+
+export const getAllTransactions = async(req, res, next) => {
   try {
     const user_id = req.user.id;
 
@@ -13,7 +15,7 @@ export const getAllTransactions = async (req, res, next) => {
     if (!transactions || transactions.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "No transactions found",
+        message: 'No transactions found',
       });
     }
 

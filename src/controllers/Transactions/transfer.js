@@ -1,16 +1,16 @@
-import { TransactionStatus, TransactionType, MoneyFlow } from "@prisma/client";
-import prisma from "../../prisma/client.js";
-import { v4 as uuidv4 } from "uuid";
-import { sendResponse } from "../../utils/responseHelper.js";
+import { TransactionStatus, TransactionType, MoneyFlow } from '@prisma/client';
+import prisma from '../../prisma/client.js';
+import { v4 as uuidv4 } from 'uuid';
+import { sendResponse } from '../../utils/responseHelper.js';
 
-export const initiateTransfer = async (req, res, next) => {
+export const initiateTransfer = async(req, res, next) => {
   try {
     const { amount, accountNumber, narration } = req.body;
     const senderId = req.user.id;
 
-    if (!senderId) return sendResponse(res, 401, false, "Unauthorized");
+    if (!senderId) {return sendResponse(res, 401, false, 'Unauthorized');}
     if (!amount || !accountNumber) {
-      return sendResponse(res, 400, false, "Missing required fields");
+      return sendResponse(res, 400, false, 'Missing required fields');
     }
 
     // fetch wallets
@@ -22,12 +22,12 @@ export const initiateTransfer = async (req, res, next) => {
     });
 
     if (!senderWallet)
-      return sendResponse(res, 404, false, "Sender wallet not found");
+    {return sendResponse(res, 404, false, 'Sender wallet not found');}
     if (!receiverWallet)
-      return sendResponse(res, 404, false, "Receiver wallet not found");
+    {return sendResponse(res, 404, false, 'Receiver wallet not found');}
 
     if (senderWallet.balance < amount) {
-      return sendResponse(res, 400, false, "Insufficient balance");
+      return sendResponse(res, 400, false, 'Insufficient balance');
     }
 
     if (senderWallet.account_number === accountNumber) {
@@ -35,7 +35,7 @@ export const initiateTransfer = async (req, res, next) => {
         res,
         400,
         false,
-        "Cannot transfer to your own account"
+        'Cannot transfer to your own account',
       );
     }
 
@@ -49,7 +49,7 @@ export const initiateTransfer = async (req, res, next) => {
     const receiverBalanceAfter = receiverWallet.balance + amount;
 
     // Run atomically
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async(tx) => {
       // update balances
       await tx.wallet.update({
         where: { id: senderWallet.id },
@@ -97,26 +97,26 @@ export const initiateTransfer = async (req, res, next) => {
       });
     });
 
-    return sendResponse(res, 200, true, "Transfer successful", {
-        amount,
-        narration,
-        transaction_date: new Date(),
-        sender: {
-          id: senderId,
-          wallet_id: senderWallet.id,
-          accountNumber: senderWallet.account_number,
-          balance_before: senderBalanceBefore,
-          balance_after: senderBalanceAfter,
-          reference: senderReference,
-        },
-      
+    return sendResponse(res, 200, true, 'Transfer successful', {
+      amount,
+      narration,
+      transaction_date: new Date(),
+      sender: {
+        id: senderId,
+        wallet_id: senderWallet.id,
+        accountNumber: senderWallet.account_number,
+        balance_before: senderBalanceBefore,
+        balance_after: senderBalanceAfter,
+        reference: senderReference,
+      },
+
       receiver: {
         id: receiverWallet.user_id,
         wallet_id: receiverWallet.id,
         accountNumber: receiverWallet.account_number,
         balance_before: receiverBalanceBefore,
         balance_after: receiverBalanceAfter,
-        reference: receiverReference, 
+        reference: receiverReference,
       },
     });
   } catch (error) {
