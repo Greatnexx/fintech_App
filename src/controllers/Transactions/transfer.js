@@ -1,7 +1,9 @@
-import { TransactionStatus, TransactionType, MoneyFlow } from '@prisma/client';
+import {  TransactionType } from '@prisma/client';
 import prisma from '../../prisma/client.js';
 import { v4 as uuidv4 } from 'uuid';
 import { sendResponse } from '../../utils/responseHelper.js';
+import { creditWallet } from '../../utils/creditWallet.js';
+import { debitWallet } from '../../utils/debitWallet.js';
 
 export const initiateTransfer = async(req, res, next) => {
   try {
@@ -43,58 +45,39 @@ export const initiateTransfer = async(req, res, next) => {
     const receiverReference = `TRF-${uuidv4()}`;
 
     const senderBalanceBefore = senderWallet.balance;
-    const senderBalanceAfter = senderWallet.balance - amount;
 
     const receiverBalanceBefore = receiverWallet.balance;
-    const receiverBalanceAfter = receiverWallet.balance + amount;
 
     // Run atomically
-    await prisma.$transaction(async(tx) => {
-      // update balances
-      await tx.wallet.update({
-        where: { id: senderWallet.id },
-        data: { balance: { decrement: amount } },
+    const result = await prisma.$transaction(async (tx) => {
+      // Debit sender wallet
+      const debitResult = await debitWallet(tx, {
+        walletId: senderWallet.id,
+        userId: senderId,
+        amount,
+        narration: narration || `Transfer to ${accountNumber}`,
+        reference: senderReference,
+        transactionType: TransactionType.TRANSFER,
+        receiverId: receiverWallet.user_id,
+        balanceBefore: senderBalanceBefore,
       });
 
-      await tx.wallet.update({
-        where: { id: receiverWallet.id },
-        data: { balance: { increment: amount } },
+      // Credit receiver wallet
+      const creditResult = await creditWallet(tx, {
+        walletId: receiverWallet.id,
+        userId: receiverWallet.user_id,
+        amount,
+        narration: narration || `Transfer from ${senderWallet.account_number}`,
+        reference: receiverReference,
+        transactionType: TransactionType.TRANSFER,
+        senderId: senderId,
+        balanceBefore: receiverBalanceBefore,
       });
 
-      // sender transaction (DEBIT)
-      await tx.transaction.create({
-        data: {
-          reference: senderReference,
-          type: TransactionType.TRANSFER,
-          status: TransactionStatus.SUCCESS,
-          amount,
-          narration: narration || `Transfer to ${accountNumber}`,
-          sender_id: senderId,
-          receiver_id: receiverWallet.user_id,
-          wallet_id: senderWallet.id,
-          money_flow: MoneyFlow.DEBIT,
-          balance_before: senderBalanceBefore,
-          balance_after: senderBalanceAfter,
-        },
-      });
-
-      // receiver transaction (CREDIT)
-      await tx.transaction.create({
-        data: {
-          reference: receiverReference,
-          type: TransactionType.TRANSFER,
-          status: TransactionStatus.SUCCESS,
-          amount,
-          narration:
-          narration || `Transfer from ${senderWallet.account_number}`,
-          sender_id: senderId,
-          receiver_id: receiverWallet.user_id,
-          wallet_id: receiverWallet.id,
-          money_flow: MoneyFlow.CREDIT,
-          balance_before: receiverBalanceBefore,
-          balance_after: receiverBalanceAfter,
-        },
-      });
+      return {
+        debitResult,
+        creditResult,
+      };
     });
 
     return sendResponse(res, 200, true, 'Transfer successful', {
@@ -106,16 +89,15 @@ export const initiateTransfer = async(req, res, next) => {
         wallet_id: senderWallet.id,
         accountNumber: senderWallet.account_number,
         balance_before: senderBalanceBefore,
-        balance_after: senderBalanceAfter,
+        balance_after: result.debitResult.balanceAfter,
         reference: senderReference,
       },
-
       receiver: {
         id: receiverWallet.user_id,
         wallet_id: receiverWallet.id,
         accountNumber: receiverWallet.account_number,
         balance_before: receiverBalanceBefore,
-        balance_after: receiverBalanceAfter,
+        balance_after: result.creditResult.balanceAfter,
         reference: receiverReference,
       },
     });
