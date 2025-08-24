@@ -1,6 +1,6 @@
-import { MoneyFlow, TransactionStatus, TransactionType } from "@prisma/client";
+import { MoneyFlow, TransactionStatus, TransactionType } from '@prisma/client';
 
-export const debitWallet = async (
+export const debitWallet = async(
   tx,
   {
     walletId,
@@ -11,7 +11,7 @@ export const debitWallet = async (
     transactionType = TransactionType.TRANSFER,
     receiverId = null,
     balanceBefore,
-  }
+  },
 ) => {
   // Update wallet balance
   await tx.wallet.update({

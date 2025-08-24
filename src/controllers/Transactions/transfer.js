@@ -49,7 +49,7 @@ export const initiateTransfer = async(req, res, next) => {
     const receiverBalanceBefore = receiverWallet.balance;
 
     // Run atomically
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async(tx) => {
       // Debit sender wallet
       const debitResult = await debitWallet(tx, {
         walletId: senderWallet.id,

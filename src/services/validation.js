@@ -141,26 +141,25 @@ export const validateProfile = [
   handleValidationErrors,
 ];
 
-
 // Transaction Validation
 
 export const validateTransaction = [
-  body("amount")
+  body('amount')
     .notEmpty()
-    .withMessage("Amount is required")
+    .withMessage('Amount is required')
     .isNumeric()
-    .withMessage("Amount must be a number")
+    .withMessage('Amount must be a number')
     .custom((value) => {
       if (value <= 0) {
-        throw new Error("Amount must be greater than 0");
+        throw new Error('Amount must be greater than 0');
       }
       if (!Number.isInteger(Number(value))) {
-        throw new Error("Amount must be a whole number");
+        throw new Error('Amount must be a whole number');
       }
       return true;
     }),
 
-  body("narration").notEmpty().withMessage("Narration is required"),
+  body('narration').notEmpty().withMessage('Narration is required'),
 
   handleValidationErrors,
 ];
