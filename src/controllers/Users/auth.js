@@ -224,11 +224,11 @@ export const loginUser = async(req, res, next) => {
     // Without join you will get ["Admin", "Customer"]
     // with join you will get "Admin, Customer"
 
-    await sendMail(
-      user_exist.email,
-      'Login Notification',
-      loginMessage(user_exist.first_name, previousLogin),
-    );
+    // await sendMail(
+    //   user_exist.email,
+    //   'Login Notification',
+    //   loginMessage(user_exist.first_name, previousLogin),
+    // );
     return sendResponse(res, 200, true, 'Logged in successfully', {
       ...user_obj,
       role: { roleName },

@@ -4,6 +4,7 @@ import crypto from 'crypto';
 
 export const handlePaystackWebhook = async(req, res) => {
   try {
+    // console.log(req.body)
     const secret = process.env.PAYSTACK_SECRET_KEY;
 
     // Convert raw body buffer to string for signature verification

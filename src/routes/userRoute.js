@@ -3,6 +3,7 @@ import { validateLogin, validateProfile, validateRegister, validateStaffRegister
 import { createUserProfile, getUserProfile } from '../controllers/Users/profile.js';
 import { createStaff, createUser, loginUser, resendOtp, resetPassword, validateAccount, verifyRegistrationOtp,  verifyResetPasswordOtp } from '../controllers/Users/auth.js';
 import { protect } from '../middlewares/authMiddleWare.js';
+import { getAccountDetailsByAccountNumber } from '../controllers/Transactions/getAllTransactions.js';
 
 const router = express.Router();
 
@@ -16,5 +17,6 @@ router.post('/resend-verification-otp', resendOtp);
 router.post('/request-password-reset', validateAccount);
 router.post('/verify-reset-otp', verifyResetPasswordOtp);
 router.post('/reset-password', resetPassword);
+router.get('/account-name/:account_number', getAccountDetailsByAccountNumber  );
 
 export default router;
