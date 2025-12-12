@@ -3,41 +3,36 @@ import nodemailer from 'nodemailer';
 
 async function sendMail(to, subject, html) {
   try {
+    // Create test account with etheral
+    const testAccount = await nodemailer.createTestAccount();
+
+    // Create a fake SMTP transporter
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: testAccount.smtp.host,
+      port: testAccount.smtp.port,
+      secure: testAccount.smtp.secure,
       auth: {
-        user:process.env.SMTP_EMAIL,
-        pass: process.env.SMTP_PASSWORD,
+        user: testAccount.user,
+        pass: testAccount.pass,
       },
     });
 
-    // let transporter = nodemailer.createTransport({
-    //   host: '247bitoption.com',
-    //   port: 465,
-    //   secure: true, // true for 465, false for other ports
-    //   auth: {
-    //       user: 'info@247bitoption.com', // generated ethereal user
-    //       pass: '{NS_c@QI8M}_'  // generated ethereal password
-    //   },
-    //   tls:{
-    //     rejectUnauthorized: true
-    //   }
-    // });
-
     const mailOptions = {
-      from: `Swift_Pay <${process.env.SMTP_EMAIL}>`,
-      to: to,
-      subject: subject,
-      html: html,
+      from: `"D-PAY ENTERPRISE" <${testAccount.user}>`,
+      to,
+      subject,
+      html,
     };
 
     const info = await transporter.sendMail(mailOptions);
-    // eslint-disable-next-line
-    console.log('Message sent: %s', info.messageId);
+    //  eslint-disable-next-line no-console
+    console.log(' Preview URL:', nodemailer.getTestMessageUrl(info));
   } catch (error) {
-    // eslint-disable-next-line
+    // eslint-disable-next-line no-console
     console.error('Error sending email:', error);
+    throw new Error('Failed to send email');
   }
 }
 
 export default sendMail;
+

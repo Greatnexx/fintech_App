@@ -1,26 +1,30 @@
-// utils/otpHelper.js
 import redisClient from '../utils/redisClient.js';
 import randomstring from 'randomstring';
 import sendMail from '../services/sendMail.js';
-import { otpMessage } from './message.js';
 
-export const sendOtpToEmail = async(user) => {
+export const sendOtpToEmail = async(user, headerMessage, templateFn, redis_key) => {
   const otp = randomstring.generate({
     length: 6,
     charset: 'numeric',
   });
 
-  const redis_key = `otp:${user.email}`;
   await redisClient.set(redis_key, otp, {
     EX: parseInt(process.env.OTP_EXP),
   });
 
   await sendMail(
     user.email,
-    'Account Validation',
-    otpMessage(user.first_name, otp),
+    headerMessage,
+    templateFn(user.first_name, otp),
   );
-  return otp;
+
+  return otp; // Useful for tests
 };
 
-// we return the otp so that we can use it in the controller to verify the otp for testing purposes
+export const getSavedOtp = async(key) => {
+  return await redisClient.get(key);
+};
+
+export const deleteOtp = async(key) => {
+  return await redisClient.del(key);
+};

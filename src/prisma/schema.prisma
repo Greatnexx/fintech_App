@@ -26,6 +26,11 @@ model User {
   lastLogin      DateTime?
   profile        UserProfile?
   roles          UserRoles[]
+  wallet         Wallet?
+  sentTransactions        Transaction[]  @relation("SentTransactions")
+  receivedTransactions    Transaction[]  @relation("ReceivedTransactions")
+  status         UserStatus    @default(PENDING_VERIFICATION)
+
 }
 
  
@@ -64,4 +69,66 @@ model UserProfile {
   marital_status  String
   date_of_birth   DateTime
   user            User          @relation(fields: [user_id], references: [id])
+}
+
+
+model Wallet {
+  id             String         @id() @unique @default(uuid())
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  user_id        String         @unique
+  balance        Float          @default(0)
+  account_number  String         @unique
+  account_name      String
+  currency        String         @default("NGN") 
+  status         String         @default("active") 
+  transactions    Transaction[]
+  user           User           @relation(fields: [user_id], references: [id])
+}
+model Transaction {
+  id           String            @id @default(uuid())
+  created_at    DateTime          @default(now())
+  updated_at     DateTime        @updatedAt
+  type         TransactionType
+  status       TransactionStatus
+  amount       Float
+  reference    String            @unique
+  narration    String?
+  sender       User?             @relation("SentTransactions", fields: [sender_id], references: [id])
+  sender_id    String?
+  receiver     User?             @relation("ReceivedTransactions", fields: [receiver_id], references: [id])
+  receiver_id  String?
+  wallet_id    String
+  money_flow  MoneyFlow          @default(CREDIT) 
+  wallet       Wallet            @relation(fields: [wallet_id], references: [id])
+  balance_before Float           @default(0)
+  balance_after  Float           @default(0)
+  transaction_date DateTime      @default(now())
+}
+
+
+
+
+enum UserStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  BLOCKED
+   
+}
+
+enum TransactionType {
+  DEPOSIT
+  TRANSFER
+  WITHDRAWAL
+}
+
+enum TransactionStatus {
+  SUCCESS
+  FAILED
+  PENDING
+}
+
+enum MoneyFlow {
+  CREDIT
+  DEBIT
 }

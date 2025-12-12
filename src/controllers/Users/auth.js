@@ -5,8 +5,19 @@ import redisClient from '../../utils/redisClient.js'; // Assuming you imported t
 import { exclude } from '../../utils/exclude.js';
 import { sendResponse } from '../../utils/responseHelper.js';
 import sendMail from '../../services/sendMail.js';
-import { loginMessage } from '../../utils/message.js';
-import { sendOtpToEmail } from '../../utils/otpHelper.js';
+import {
+  confirmRegistrationMessage,
+  loginMessage,
+  otpMessage,
+  registerMessage,
+  validateAccountMessage,
+} from '../../utils/message.js';
+import {
+  deleteOtp,
+  getSavedOtp,
+  sendOtpToEmail,
+} from '../../utils/otpHelper.js';
+import { generateAccountNumber } from '../../utils/generateAccountNumber.js';
 
 export const createUser = async(req, res, next) => {
   try {
@@ -26,7 +37,7 @@ export const createUser = async(req, res, next) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user in database
+    // Create user in database and assign them a status Prisma allows you to connect a relation by any unique field, not just id.and name is the unique field thats why we use name to connect
     const user = await prisma.user.create({
       data: {
         email,
@@ -63,16 +74,19 @@ export const createUser = async(req, res, next) => {
       },
     });
 
-    // attach the role name to the user object
+    const redis_key = `otp:${email}`;
 
-    const user_obj = exclude(user, ['password']);
+    await sendOtpToEmail(
+      user,
+      'Confirm your registration',
+      confirmRegistrationMessage,
+      redis_key,
+    );
 
-    // Generate auth token
-    const token = generateToken(user.id);
+    const user_obj = exclude(user, ['password', 'lastLogin']);
 
     return sendResponse(res, 201, true, 'User registered successfully', {
       ...user_obj,
-      token,
     });
   } catch (error) {
     next(error);
@@ -134,8 +148,6 @@ export const createStaff = async(req, res, next) => {
       },
     });
 
-    const token = generateToken(user.id);
-
     const user_obj = exclude(user, ['password']);
 
     return sendResponse(
@@ -143,7 +155,8 @@ export const createStaff = async(req, res, next) => {
       201,
       true,
       'Your signup as a staff was successful',
-      { ...user_obj, token },
+      { ...user_obj },
+      user.status,
     );
   } catch (error) {
     next(error);
@@ -177,7 +190,6 @@ export const loginUser = async(req, res, next) => {
     }
 
     const token = generateToken(user_exist.id);
-    const redis_key = `auth_token:${user_exist.id}`;
 
     // This captures the current date and time when the user is logging in.
     const currentLogin = new Date();
@@ -193,6 +205,8 @@ export const loginUser = async(req, res, next) => {
         lastLogin: currentLogin,
       },
     });
+
+    const redis_key = `auth_token:${user_exist.id}`;
 
     await redisClient.set(redis_key, token, {
       EX: parseInt(process.env.EXP_TIME),
@@ -210,16 +224,70 @@ export const loginUser = async(req, res, next) => {
     // Without join you will get ["Admin", "Customer"]
     // with join you will get "Admin, Customer"
 
-    await sendMail(
-      user_exist.email,
-      'Login Notification',
-      loginMessage(user_exist.first_name, previousLogin),
-    );
+    // await sendMail(
+    //   user_exist.email,
+    //   'Login Notification',
+    //   loginMessage(user_exist.first_name, previousLogin),
+    // );
     return sendResponse(res, 200, true, 'Logged in successfully', {
       ...user_obj,
       role: { roleName },
       token,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const validateAccount = async(req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return sendResponse(res, 404, false, 'User not found');
+    }
+
+    const redis_Key = `otp:${email}`;
+
+    await sendOtpToEmail(
+      user,
+      'Validate your account',
+      validateAccountMessage,
+      redis_Key,
+    );
+
+    return sendResponse(res, 200, true, 'OTP sent successfully', user.email);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyResetOtp = async(req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (!user) {
+      return sendResponse(res, 404, false, 'User not found');
+    }
+
+    const redis_key = `otp:${email}`;
+    const savedOtp = await getSavedOtp(redis_key);
+
+    if (!savedOtp) {
+      return sendResponse(res, 400, false, 'OTP expired or missing');
+    }
+    if (savedOtp !== otp) {
+      return sendResponse(res, 400, false, 'Invalid OTP');
+    }
+
+    await sendMail(
+      user.email,
+      'OTP verified, you can now reset your password',
+      'Your OTP has been verified successfully. You can now reset your password.',
+    );
   } catch (error) {
     next(error);
   }
@@ -247,26 +315,8 @@ export const resetPassword = async(req, res, next) => {
   }
 };
 
-export const validateAccount = async(req, res, next) => {
+export const verifyRegistrationOtp = async(req, res, next) => {
   try {
-    const { email } = req.body;
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      return sendResponse(res, 404, false, 'User not found');
-    }
-
-    await sendOtpToEmail(user);
-
-    return sendResponse(res, 200, true, 'OTP sent successfully', user.email);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const verifyOtp = async(req, res, next) => {
-  try {
-    // Extract email and OTP from request body we are including email instead of only otp because we need to check if the user exists in the database
-
     const { email, otp } = req.body;
 
     const user = await prisma.user.findUnique({
@@ -276,21 +326,106 @@ export const verifyOtp = async(req, res, next) => {
       return sendResponse(res, 404, false, 'User not found');
     }
 
-    const redis_key = `otp:${email}`;
-    const savedOtp = await redisClient.get(redis_key);
+    const redisKey = `otp:${email}`;
+    const savedOtp = await getSavedOtp(redisKey);
 
     if (!savedOtp) {
-      return sendResponse(res, 400, false, 'OTP expired or not found');
+      return sendResponse(res, 400, false, 'OTP expired or missing');
     }
-
     if (savedOtp !== otp) {
       return sendResponse(res, 400, false, 'Invalid OTP');
     }
 
-    //  delete the OTP once it is verified ensuring it can't be used again
-    await redisClient.del(redis_key);
+    // Activate user
 
-    return sendResponse(res, 200, true, 'OTP verified successfully');
+    await prisma.user.update({
+      where: { email },
+      data: { status: 'ACTIVE' },
+    });
+
+    // Create wallet
+    await prisma.wallet.create({
+      data: {
+        user_id: user.id,
+        account_number: await generateAccountNumber(),
+        account_name: `${user.first_name} ${user.last_name}`,
+      },
+    });
+
+    await sendMail(
+      user.email,
+      'Registration Successful',
+      registerMessage(user.first_name, user.last_name),
+    );
+
+    await deleteOtp(redisKey);
+    return sendResponse(res, 200, true, 'Registration verified successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyResetPasswordOtp = async(req, res, next) => {
+  try {
+    const { email, otp, new_password } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return sendResponse(res, 404, false, 'User not found');
+    }
+
+    const redisKey = `otp:${email}`;
+    const savedOtp = await getSavedOtp(redisKey);
+
+    if (!savedOtp) {
+      return sendResponse(res, 400, false, 'OTP expired or missing');
+    }
+    if (savedOtp !== otp) {
+      return sendResponse(res, 400, false, 'Invalid OTP');
+    }
+
+    if (!new_password) {
+      return sendResponse(res, 400, false, 'New password required');
+    }
+
+    const hashedPassword = await bcrypt.hash(new_password, 10);
+    await prisma.user.update({
+      where: { email },
+      data: { password: hashedPassword },
+    });
+
+    await deleteOtp(redisKey);
+    return sendResponse(res, 200, true, 'Password reset successfully');
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resendOtp = async(req, res, next) => {
+  try {
+    const { email } = req.body;
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return sendResponse(res, 404, false, 'User not found');
+    }
+
+    // this function checks if the user is already active
+    if (user.status === 'ACTIVE') {
+      return sendResponse(res, 400, false, 'User is already active');
+    }
+
+    // store the OTP in Redis with a key based on the user's email
+    const redis_key = `otp:${email}`;
+
+    await sendOtpToEmail(
+      user,
+      'Verify your email address',
+      otpMessage,
+      redis_key,
+    );
+
+    return sendResponse(res, 200, true, 'OTP resent successfully', user.email);
   } catch (error) {
     next(error);
   }
