@@ -35,7 +35,7 @@ export const handlePaystackWebhook = async(req, res) => {
 
       if (!existingTxn) {
         // eslint-disable-next-line
-          console.log("⚠️ No pending transaction found:", reference);
+          console.log(" No pending transaction found:", reference);
         return res.sendStatus(200);
       }
 
@@ -82,17 +82,3 @@ export const handlePaystackWebhook = async(req, res) => {
   }
 };
 
-// paystack webhook look like this
-// {
-//   "event": "charge.success",
-//   "data": {
-//     "id": "txn_123",
-//     "reference": "ref_123",
-//     "amount": 10000,
-//     "currency": "NGN",
-//     "status": "SUCCESS",
-//     "metadata": {
-//       "wallet_id": "wallet_123"
-//     }
-//   }
-// }
