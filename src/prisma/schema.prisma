@@ -30,6 +30,10 @@ model User {
   sentTransactions        Transaction[]  @relation("SentTransactions")
   receivedTransactions    Transaction[]  @relation("ReceivedTransactions")
   status         UserStatus    @default(PENDING_VERIFICATION)
+<<<<<<< HEAD
+=======
+  beneficiaries  Beneficiary[]
+>>>>>>> 3fe7e3c (squashing commit)
 
 }
 
@@ -106,6 +110,22 @@ model Transaction {
   transaction_date DateTime      @default(now())
 }
 
+<<<<<<< HEAD
+=======
+model Beneficiary {
+  id             String         @id @default(uuid())
+  created_at     DateTime       @default(now())
+  updated_at     DateTime       @updatedAt
+  user_id        String
+  account_name   String
+  account_number String
+  recipient_code String?         @unique
+  bank_name      String
+  bank_code      String
+  user           User           @relation(fields: [user_id], references: [id])
+
+}
+>>>>>>> 3fe7e3c (squashing commit)
 
 
 

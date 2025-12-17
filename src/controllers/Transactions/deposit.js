@@ -23,14 +23,13 @@ export const initiateDeposit = async(req, res,next) => {
       return sendResponse(res, 400, false, 'Invalid Amount');
     }
 
-    // We create a unique reference number so we can later say: “Hey Paystack, what happened to this exact transaction”
-    const reference = `DEP-${uuidv4()}`;
-
     // Wallet check ensures that only users with wallets can initiate deposits.
-
     const wallet = await prisma.wallet.findUnique({
       where: { user_id },
     });
+
+    // We create a unique reference number so we can later say: “Hey Paystack, what happened to this exact transaction”
+    const reference = `DEP-${uuidv4()}`;
 
     if (!wallet) {
       return sendResponse(res, 400, false, 'Wallet not found');
